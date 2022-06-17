@@ -7,9 +7,8 @@ import lombok.*;
 import javax.persistence.*;
 
 import static javax.persistence.FetchType.LAZY;
-
-@Entity
 @Builder
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -31,5 +30,13 @@ public class Delivery {
 
     public void setOrder(Order order) {
         this.order = order;
+    }
+
+    public static Delivery createDelivery(Address address) {
+
+        return Delivery.builder()
+                .address(address)
+                .status(DeliveryStatus.READY)
+                .build();
     }
 }
