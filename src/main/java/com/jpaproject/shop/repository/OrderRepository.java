@@ -1,5 +1,6 @@
 package com.jpaproject.shop.repository;
 
+import com.jpaproject.shop.controller.order.OrderResponse;
 import com.jpaproject.shop.domain.Order;
 import com.jpaproject.shop.domain.User;
 import com.jpaproject.shop.domain.enums.OrderStatus;
@@ -50,4 +51,13 @@ public class OrderRepository {
         return query.getResultList();
 
     }
+
+    public List<Order> findAllWithUND() {
+        return entityManager.createQuery(
+                "select o from Order o " +
+                " join fetch o.user u" +
+                " join fetch o.delivery d", Order.class)
+        .getResultList();
+    }
+
 }

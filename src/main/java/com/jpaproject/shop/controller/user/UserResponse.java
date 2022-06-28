@@ -7,20 +7,20 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class UserResponse {
-    private Long id;
+    private Long userId;
     private String name;
     private Address address;
 
     @Data
     @AllArgsConstructor
     static class CreateUserResponse{
-        private Long id;
+        private Long userId;
     }
 
     @Data
     @AllArgsConstructor
     static class UpdateUserResponse{
-        private Long id;
+        private Long userId;
         private String name;
     }
 
