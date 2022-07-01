@@ -36,8 +36,8 @@ public class UserController {
     }
 
     @GetMapping("/api/users")
-    public ResultList showUsers() {
-        List<User> findUsers = userService.findUsers();
+    public ResultList showUsers(@RequestParam(value = "offset", defaultValue = "0") int offset) {
+        List<User> findUsers = userService.findUsers(offset);
         List<UserResponse> collect = findUsers.stream().map(m -> new UserResponse(m.getId(), m.getName(), m.getAddress()))
                 .collect(Collectors.toList());
         return new ResultList(collect);

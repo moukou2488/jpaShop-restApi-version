@@ -6,6 +6,7 @@ import com.jpaproject.shop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -33,8 +34,8 @@ public class UserService {
 
 
     //회원 전체 조회
-    public List<User> findUsers() {
-        return userRepository.findAll();
+    public List<User> findUsers(int offset) {
+        return userRepository.findAll(offset);
     }
 
     //단일 회원 조회
