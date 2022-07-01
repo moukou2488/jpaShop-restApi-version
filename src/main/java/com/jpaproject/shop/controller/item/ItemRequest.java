@@ -1,11 +1,13 @@
 package com.jpaproject.shop.controller.item;
 
+import com.jpaproject.shop.domain.OrderItem;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ItemDto {
+public class ItemRequest {
 
     private Long id;
 
@@ -21,5 +23,4 @@ public class ItemDto {
 
     private String director;
     private String actor;
-
 }

@@ -1,6 +1,6 @@
 package com.jpaproject.shop.domain.item;
 
-import com.jpaproject.shop.controller.item.ItemDto;
+import com.jpaproject.shop.controller.item.ItemRequest;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -19,7 +19,7 @@ public class Album extends Item {
     private String etc;
 
     @Override
-    public void changeChildField(ItemDto item) {
+    public void changeChildField(ItemRequest item) {
         this.artist = item.getArtist();
         this.etc = item.getEtc();
     }

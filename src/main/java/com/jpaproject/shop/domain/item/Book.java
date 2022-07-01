@@ -1,10 +1,9 @@
 package com.jpaproject.shop.domain.item;
 
-import com.jpaproject.shop.controller.item.ItemDto;
+import com.jpaproject.shop.controller.item.ItemRequest;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
@@ -22,7 +21,7 @@ public class Book extends Item {
 
 
     @Override
-    public void changeChildField(ItemDto item) {
+    public void changeChildField(ItemRequest item) {
         this.author = item.getAuthor();
         this.isbn = item.getIsbn();
     }
