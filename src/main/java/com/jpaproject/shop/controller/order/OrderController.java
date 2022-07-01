@@ -1,14 +1,13 @@
 package com.jpaproject.shop.controller.order;
 
 import com.jpaproject.shop.controller.ResultList;
-import com.jpaproject.shop.domain.Order;
 import com.jpaproject.shop.repository.OrderRepository;
 import com.jpaproject.shop.repository.OrderSearch;
-import com.jpaproject.shop.repository.query.OrderQueryDto;
+import com.jpaproject.shop.repository.query.ItemOrderQueryResponse;
+import com.jpaproject.shop.repository.query.OrderQueryResponse;
 import com.jpaproject.shop.repository.query.OrderQueryRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,40 +20,84 @@ public class OrderController {
 
     private final OrderQueryRepository orderQueryRepository;
 
-    /*@GetMapping("/api/orders")
-    public ResultList orders() {
+    //아이템 단품 주문 조회 ver.쿼리
+    public ResultList ordersQuery() {
+        List<OrderQueryResponse> orderResponseList =
+                orderQueryRepository.findAll();
 
-        List<OrderResponse> collect = orderRepository.findAll(new OrderSearch())
-                .stream().map(OrderResponse::new).collect(Collectors.toList());
+        return ResultList.builder()
+                .data(orderResponseList)
+                .build();
+    }
 
-        ResultList result = ResultList.builder()
+    //아이템 단품 주문 조회 ver.패치조인
+
+    public ResultList ordersFetch(@RequestParam(value = "offset", defaultValue = "0") int offset) {
+        List<OrderResponse> orderResponseList =
+                orderRepository.findAllWithUND(offset).stream().map(OrderResponse::new).collect(Collectors.toList());
+
+        return ResultList.builder()
+                .data(orderResponseList)
+                .build();
+    }
+
+
+    //아이템 여러건 주문 조회 사용 X ver.LAZY 초기화
+    @GetMapping("/api/orders")
+    public ResultList ItemListOrdersLazy(@RequestBody OrderSearch orderSearch) {
+        List<OrderResponse.ItemsOrderResponse> collect = orderRepository.findAll(orderSearch)
+                .stream()
+                .map(OrderResponse.ItemsOrderResponse::new) //생성자에서 LAZY 초기화를 통해 값 세팅 -> 쿼리가 너무 많이 나가게 됨
+                .collect(Collectors.toList());
+
+        return ResultList.builder()
+                .data(collect)
+                .build();
+    }
+
+    //아이템 여러건 주문 조회 but 중복데이터가 어플리케이션에 넘어옴 & 페이징 안됨 ver.distinct fetch join
+    public ResultList ItemListOrdersDistnct() {
+        List<OrderResponse.ItemsOrderResponse> collect = orderRepository.findAllWithItem()
+                .stream()
+                .map(OrderResponse.ItemsOrderResponse::new)
+                .collect(Collectors.toList());
+
+        return ResultList.builder()
                 .data(collect)
                 .build();
 
-        return result;
-    }*/ // 쿼리가 LAZY 때문에 너무 많이 나감 -> 리팩토링
+    }
+    //아이템 여러건 주문 조회 사용 X ver.쿼리 n+1 문제 발생생
+   public ResultList ItemListOrdersQuery() {
+        List<ItemOrderQueryResponse> resultList = orderQueryRepository.findAllWithItem();
 
-    @GetMapping("/api/v1/orders")
-    public ResultList ordersV1() {
-        List<OrderResponse> orderResponseList =
-                orderRepository.findAllWithUND().stream().map(OrderResponse::new).collect(Collectors.toList());
-
-        ResultList<Object> result = ResultList.builder()
-                .data(orderResponseList)
+        return ResultList.builder()
+                .data(resultList)
                 .build();
 
-        return result;
     }
 
-    @GetMapping("/api/v2/orders")
-    public ResultList ordersV2() {
-        List<OrderQueryDto> orderResponseList =
-                orderQueryRepository.findAllWithQ();
+    //아이템 여러건 주문 조회 ver.쿼리 in절을 사용해 n+1 해결
+    public ResultList ItemListOrdersQueryMap() {
+        List<ItemOrderQueryResponse> orders = orderQueryRepository.findAllWithItemOptimization();
 
-        ResultList<Object> result = ResultList.builder()
-                .data(orderResponseList)
+        return ResultList.builder()
+                .data(orders)
                 .build();
-
-        return result;
     }
+
+    //아이템 여러건 주문 조회 ver.default_batch_fetch_size를 이용한 LAZY 초기화 문제 해결
+    @GetMapping("/api/orders/items")
+    public ResultList ItemListOrders(@RequestParam(value = "offset", defaultValue = "0") int offset) {
+        List<OrderResponse.ItemsOrderResponse> orders =
+                orderRepository.findAllWithUND(offset)
+                        .stream()
+                        .map(OrderResponse.ItemsOrderResponse::new)
+                        .collect(Collectors.toList());
+
+        return ResultList.builder()
+                .data(orders)
+                .build();
+    }
+
 }

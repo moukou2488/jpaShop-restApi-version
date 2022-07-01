@@ -2,8 +2,12 @@ package com.jpaproject.shop.repository;
 
 import com.jpaproject.shop.controller.order.OrderResponse;
 import com.jpaproject.shop.domain.Order;
+import com.jpaproject.shop.domain.QOrder;
+import com.jpaproject.shop.domain.QUser;
 import com.jpaproject.shop.domain.User;
 import com.jpaproject.shop.domain.enums.OrderStatus;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -28,36 +32,54 @@ public class OrderRepository {
     }
 
     public List<Order> findAll(OrderSearch orderSearch) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Order> cq = cb.createQuery(Order.class);
-        Root<Order> o = cq.from(Order.class);
-        Join<Order, User> m = o.join("user", JoinType.INNER); //회원과 조인
-        List<Predicate> criteria = new ArrayList<>();
-        //주문 상태 검색
-        if (orderSearch.getOrderStatus() != null) {
-            Predicate status = cb.equal(o.get("status"),
-                    orderSearch.getOrderStatus());
-            criteria.add(status);
-        }
-        //회원 이름 검색
-        if (StringUtils.hasText(orderSearch.getUserName())) {
-            Predicate name =
-                    cb.like(m.<String>get("name"), "%" +
-                            orderSearch.getUserName() + "%");
-            criteria.add(name);
-        }
-        cq.where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
-        TypedQuery<Order> query = entityManager.createQuery(cq).setMaxResults(1000); //최대 1000건
-        return query.getResultList();
+        JPAQueryFactory query = new JPAQueryFactory(entityManager);
+
+        QOrder order = QOrder.order;
+        QUser user = QUser.user;
+
+        return query
+                .select(order)
+                .from(order)
+                .join(order.user, user)
+                .limit(1000)
+                .where(statusEq(orderSearch.getOrderStatus()), nameLike(orderSearch.getUserName()))
+                .fetch();
 
     }
 
-    public List<Order> findAllWithUND() {
+    private BooleanExpression nameLike(String username) {
+        if(!StringUtils.hasText(username)) return null;
+        return QUser.user.name.like(username);
+    }
+
+    private BooleanExpression statusEq(OrderStatus statusCond) {
+        if(statusCond == null) return null;
+
+        return QOrder.order.status.eq(statusCond);
+    }
+
+
+
+    public List<Order> findAllWithUND(int offset) {
         return entityManager.createQuery(
                 "select o from Order o " +
                 " join fetch o.user u" +
                 " join fetch o.delivery d", Order.class)
-        .getResultList();
+                .setFirstResult(offset)
+                .setMaxResults(100)
+                .getResultList();
+    }
+
+    public List<Order> findAllWithItem() {
+        return entityManager.createQuery(
+                "select distinct o from Order o " +
+                        " join fetch o.user u" +
+                        " join fetch o.delivery d" +
+                        " join fetch o.orderItems oi" +
+                        " join fetch oi.item i", Order.class)
+                //.setFirstResult(0) toMany에서 distinct를 사용하면 페이징 불가능
+                //.setMaxResults(10)
+                .getResultList();
     }
 
 }
