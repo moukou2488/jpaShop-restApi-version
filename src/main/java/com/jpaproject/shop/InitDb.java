@@ -24,7 +24,7 @@ public class InitDb {
     @Component
     @Transactional
     @RequiredArgsConstructor
-    static class InitService{
+    static class InitService {
 
         private final EntityManager entityManager;
 
@@ -72,7 +72,6 @@ public class InitDb {
             Order order = Order.createOrder(user, deliveryA, orderItem1, orderItem2);
 
             entityManager.persist(order);
-
 
 
         }

@@ -48,23 +48,22 @@ public class OrderRepository {
     }
 
     private BooleanExpression nameLike(String username) {
-        if(!StringUtils.hasText(username)) return null;
+        if (!StringUtils.hasText(username)) return null;
         return QUser.user.name.like(username);
     }
 
     private BooleanExpression statusEq(OrderStatus statusCond) {
-        if(statusCond == null) return null;
+        if (statusCond == null) return null;
 
         return QOrder.order.status.eq(statusCond);
     }
 
 
-
     public List<Order> findAllWithUND(int offset) {
         return entityManager.createQuery(
                 "select o from Order o " +
-                " join fetch o.user u" +
-                " join fetch o.delivery d", Order.class)
+                        " join fetch o.user u" +
+                        " join fetch o.delivery d", Order.class)
                 .setFirstResult(offset)
                 .setMaxResults(100)
                 .getResultList();

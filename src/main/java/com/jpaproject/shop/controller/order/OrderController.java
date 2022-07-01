@@ -67,8 +67,9 @@ public class OrderController {
                 .build();
 
     }
+
     //아이템 여러건 주문 조회 사용 X ver.쿼리 n+1 문제 발생생
-   public ResultList ItemListOrdersQuery() {
+    public ResultList ItemListOrdersQuery() {
         List<ItemOrderQueryResponse> resultList = orderQueryRepository.findAllWithItem();
 
         return ResultList.builder()
