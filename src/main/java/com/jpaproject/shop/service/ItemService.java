@@ -1,8 +1,6 @@
 package com.jpaproject.shop.service;
 
-import com.jpaproject.shop.controller.item.BookForm;
-import com.jpaproject.shop.controller.item.ItemDto;
-import com.jpaproject.shop.domain.item.Book;
+import com.jpaproject.shop.controller.item.ItemRequest;
 import com.jpaproject.shop.domain.item.Item;
 import com.jpaproject.shop.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +24,10 @@ public class ItemService {
     }
 
     @Transactional
-    public void updateItem(Long itemId, ItemDto itemDto) {
-
+    public void updateItem(Long itemId, ItemRequest itemRequest) {
         Item findItem = itemRepository.findOne(itemId);
-        findItem.changeParentField(itemDto);
-        findItem.changeChildField(itemDto);
+        findItem.changeParentField(itemRequest);
+        findItem.changeChildField(itemRequest);
     }
 
     public List<Item> findItems() {
